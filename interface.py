@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.clicked.connect(self.edit_row)
         self.pushButton_3.clicked.connect(self.delete_row)
         self.pushButton_4.clicked.connect(self.update_table)
-        '''self.pushButton_5.clicked.connect(self.close)'''
+        self.pushButton_5.clicked.connect(self.close)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -167,10 +167,18 @@ class Ui_MainWindow(object):
             self.loaddb()
 
     def delete_row(self):
-        print()
+        selection = self.tableWidget.currentRow()
+        connection = sqlite3.connect('my_database.db')
+        cursor = connection.cursor()
+        id_item = self.tableWidget.item(selection, 0)
+        record_id = id_item.text()
+        cursor.execute("DELETE FROM Deers WHERE id = ?", (record_id,))
+        connection.commit()
+        connection.close()
+        self.loaddb()
 
     def update_table(self):
-        print()
+        self.loaddb()
 
     def loaddb(self):
         connection = sqlite3.connect('my_database.db')
@@ -190,6 +198,8 @@ class Ui_MainWindow(object):
             for col_idx, value in enumerate(row):
                 self.tableWidget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
 
+    def close(self, event):
+        event.accept()
 
 if __name__ == "__main__":
     import sys
