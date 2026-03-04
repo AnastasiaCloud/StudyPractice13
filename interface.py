@@ -9,7 +9,10 @@
 
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox, QInputDialog
+from PyQt5.QtCore import Qt
+import sys
+import pymysql
 
 
 class Ui_MainWindow(object):
@@ -82,7 +85,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.clicked.connect(self.edit_row)
         self.pushButton_3.clicked.connect(self.delete_row)
         self.pushButton_4.clicked.connect(self.update_table)
-        self.pushButton_5.clicked.connect(self.close())
+        '''self.pushButton_5.clicked.connect(self.close)'''
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -98,6 +101,37 @@ class Ui_MainWindow(object):
         self.pushButton_4.setText(_translate("MainWindow", "Обновить"))
         self.pushButton_5.setText(_translate("MainWindow", "Выход"))
         self.label.setText(_translate("MainWindow", "Работа с базой данных"))
+
+    def add_row(self):
+        connection = sqlite3.connect('my_database.db')
+        cursor = connection.cursor()
+        cursor.execute('PRAGMA table_info(Deers)')
+        columns_info = cursor.fetchall()
+        
+        column_names = ', '.join([col[1] for col in columns_info])
+        print(column_names)
+        
+        text, ok = QInputDialog.getText(None, "Добавить запись", f"Столбцы таблицы:\n{column_names}\n\nВведите значения через запятую:")
+        if ok and text:
+            values = [v.strip() for v in text.split(',')]
+        
+            placeholders = ', '.join(['?' for _ in values])
+            query = f"INSERT INTO Deers VALUES ({placeholders})"
+            
+            cursor.execute(query, values)
+            connection.commit()
+            cursor.close()
+            connection.close()
+            self.loaddb()
+
+    def edit_row(self):
+        print()
+
+    def delete_row(self):
+        print()
+
+    def update_table(self):
+        print()
 
     def loaddb(self):
         connection = sqlite3.connect('my_database.db')
@@ -116,18 +150,6 @@ class Ui_MainWindow(object):
         for row_idx, row in enumerate(data):
             for col_idx, value in enumerate(row):
                 self.tableWidget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
-
-    def add_row(self):
-        print()
-
-    def edit_row(self):
-        print()
-
-    def delete_row(self):
-        print()
-
-    def update_table(self):
-        print()
 
 
 if __name__ == "__main__":
