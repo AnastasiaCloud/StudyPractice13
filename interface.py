@@ -125,7 +125,46 @@ class Ui_MainWindow(object):
             self.loaddb()
 
     def edit_row(self):
-        print()
+        selection = self.tableWidget.currentRow()
+        connection = sqlite3.connect('my_database.db')
+        cursor = connection.cursor()
+        
+        id_item = self.tableWidget.item(selection, 0)
+        record_id = id_item.text()
+
+        current_values = []
+        for col in range(self.tableWidget.columnCount()):
+            item = self.tableWidget.item(selection, col)
+            current_values.append(item.text() if item else "")
+
+        print(current_values)
+
+        cursor.execute('PRAGMA table_info(Deers)')
+        columns_info = cursor.fetchall()
+        column_names = [col[1] for col in columns_info]
+
+        print(column_names)
+        
+        text, ok = QInputDialog.getText(
+            None,
+            "Изменить запись",
+            f"Столбцы таблицы:\n{', '.join(column_names)}\n"
+            f"Текущие значения:\n{', '.join(current_values)}\n\n"
+            f"Введите новые значения через запятую:",
+            text=', '.join(current_values)
+        )
+
+        if ok and text:
+            new_values = [v.strip() for v in text.split(',')]
+            
+            set_clause = ', '.join([f"{col} = ?" for col in column_names[1:]])
+            query = f"UPDATE Deers SET {set_clause} WHERE {column_names[0]} = ?"
+            
+            cursor.execute(query, new_values[1:] + [record_id])
+            connection.commit()
+            
+            connection.close()
+            self.loaddb()
 
     def delete_row(self):
         print()
