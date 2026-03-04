@@ -78,6 +78,12 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.pushButton.clicked.connect(self.add_row)
+        self.pushButton_2.clicked.connect(self.edit_row)
+        self.pushButton_3.clicked.connect(self.delete_row)
+        self.pushButton_4.clicked.connect(self.update_table)
+        self.pushButton_5.clicked.connect(self.close())
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -110,6 +116,18 @@ class Ui_MainWindow(object):
         for row_idx, row in enumerate(data):
             for col_idx, value in enumerate(row):
                 self.tableWidget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+
+    def add_row(self):
+        print()
+
+    def edit_row(self):
+        print()
+
+    def delete_row(self):
+        print()
+
+    def update_table(self):
+        print()
 
 
 if __name__ == "__main__":
