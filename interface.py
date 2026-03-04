@@ -9,6 +9,7 @@
 
 import sqlite3
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QTableWidgetItem
 
 
 class Ui_MainWindow(object):
@@ -106,8 +107,9 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderLabels(columns)
         self.tableWidget.setRowCount(len(data))
 
-        '''for row_idx, row in enumerate(data):
-            for col_idx, value in enumerate(row):'''
+        for row_idx, row in enumerate(data):
+            for col_idx, value in enumerate(row):
+                self.tableWidget.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
 
 
 if __name__ == "__main__":
