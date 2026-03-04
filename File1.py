@@ -1,13 +1,14 @@
 import sqlite3
 
-with sqlite3.connect('my_database.db') as connection:
-    cursor = connection.cursor()
+connection = sqlite3.connect('my_database.db')
+cursor = connection.cursor()
 
-    try:
-        with connection:
-        cursor.execute('INSERT INTO Users (username, email) VALUES (?,?)', ('user3', 'user3@example.com'))
-        cursor.execute('INSERT INTO Users (username, email) VALUES (?,?)', ('user4', 'user4@example.com'))
+query = 'SELECT * FROM Users WHERE age > ?'
+cursor.execute(query, (25,))
+users = cursor.fetchall()
 
-    except:
-        pass
+for user in users:
+    print(user)
+
+connection.close()
 
