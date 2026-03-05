@@ -12,7 +12,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox, QInputDialog
 from PyQt5.QtCore import Qt
 import sys
-import pymysql
 
 
 class Ui_MainWindow(object):
