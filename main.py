@@ -190,8 +190,106 @@ class client_window(QDialog):
                 main_form.read_clients()
                 return
             except:
+                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
+
+
+class medicine_window(QDialog):
+    def __init__(self, parent=None):
+        QDialog.__init__(self, parent)
+        self.ui = medicineUI()
+        self.ui.setupUi(self)
+
+    def create_medicine(self):
+        client_data = [
+                       self.ui.lineEdit_2.text(),
+                       self.ui.lineEdit_3.text(),
+                       self.ui.lineEdit_4.text(),
+                       self.ui.lineEdit_5.text(),
+                       self.ui.lineEdit_6.text()]
+        if any([item == '' for item in client_data]):
+            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            return
+        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to add a client?',
+                                 QMessageBox.Ok|QMessageBox.Cancel)
+        if q == QMessageBox.Ok:
+            try:
+                cursor.execute('INSERT INTO Препараты VALUES(NULL,?,?,?,?,?)', client_data)
+                conn.commit()
+                main_form.read_medicine()
+                return
+            except:
                 QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
-    
+
+    def update_medicine(self):
+        medicine_id = self.inn
+        medicine_data = [
+                       self.ui.lineEdit_2.text(),
+                       self.ui.lineEdit_3.text(),
+                       self.ui.lineEdit_4.text(),
+                       self.ui.lineEdit_5.text(),
+                       self.ui.lineEdit_6.text()]
+        if any([item == '' for item in client_data]):
+            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            return
+        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to change a client?',
+                                 QMessageBox.Ok|QMessageBox.Cancel)
+        if q == QMessageBox.Ok:
+            try:
+                cursor.execute(f'UPDATE Препараты SET name = ?, origin_country = ?, pack = ?, price = ?, certificate = ? WHERE medicine_number = {medicine_id}', medicine_data)
+                conn.commit()
+                main_form.read_medicine()
+                return
+            except:
+                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
+
+class orders_window(QDialog):
+    def __init__(self, parent=None):
+        QDialog.__init__(self, parent)
+        self.ui = ordersUI()
+        self.ui.setupUi(self)
+
+    def create_order(self):
+        client_data = [
+                       self.ui.lineEdit_2.text(),
+                       self.ui.lineEdit_3.text(),
+                       self.ui.lineEdit_4.text(),
+                       self.ui.lineEdit_5.text(),
+                       self.ui.lineEdit_6.text()]
+        if any([item == '' for item in client_data]):
+            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            return
+        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to add a client?',
+                                 QMessageBox.Ok|QMessageBox.Cancel)
+        if q == QMessageBox.Ok:
+            try:
+                cursor.execute('INSERT INTO Заказы VALUES(NULL,?,?,?,?,?)', client_data)
+                conn.commit()
+                main_form.read_medicine()
+                return
+            except:
+                QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
+
+    def update_order(self):
+        order_id = self.inn
+        order_data = [
+                       self.ui.lineEdit_2.text(),
+                       self.ui.lineEdit_3.text(),
+                       self.ui.lineEdit_4.text(),
+                       self.ui.lineEdit_5.text(),
+                       self.ui.lineEdit_6.text()]
+        if any([item == '' for item in client_data]):
+            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            return
+        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to change a client?',
+                                 QMessageBox.Ok|QMessageBox.Cancel)
+        if q == QMessageBox.Ok:
+            try:
+                cursor.execute(f'UPDATE Заказы SET client_number = ?, medicine_code = ?, date = ?, quantity = ?, sale = ? WHERE order_number = {order_id}', order_data)
+                conn.commit()
+                main_form.read_medicine()
+                return
+            except:
+                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
         
 
 if __name__ == "__main__":
