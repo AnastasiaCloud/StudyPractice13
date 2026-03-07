@@ -21,10 +21,10 @@ class LoginWindow(QMainWindow):
         self.ui = LoginUI()
         self.ui.setupUi(self)
 
-        #Подключаем кнопку
+        
         self.ui.pushButton.clicked.connect(self.login)
         self.ui.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
-    #В фукнкции проверяем совпадают ли введеные данные с заданными
+    
     def login(self):
         if self.ui.lineEdit.text() == LOGIN and self.ui.lineEdit_2.text() == PASSWORD:
             self.main_form = main_window()  
@@ -165,7 +165,7 @@ class main_window(QMainWindow):
         elif current_table == 'Заказы':
             self.orders_form = orders_window(self)
             self.orders_form.ui.pushButton.clicked.connect(self.orders_form.create_order)
-            # Заполняем комбобоксы данными из связанных таблиц
+            
             self.orders_form.load_combo_boxes()
             self.orders_form.exec()
 
@@ -182,7 +182,7 @@ class main_window(QMainWindow):
                 client_data = self.client_data[current_row]
                 self.client_form.inn = client_data[0]
                 
-                # Заполняем поля формы
+                
                 self.client_form.ui.lineEdit.setText(str(client_data[0]))  
                 self.client_form.ui.lineEdit_2.setText(str(client_data[1]))  
                 self.client_form.ui.lineEdit_3.setText(str(client_data[2]))  
@@ -198,7 +198,6 @@ class main_window(QMainWindow):
                 medicine_data = self.medicine_data[current_row]
                 self.medicine_form.inn = medicine_data[0]
                 
-                # Заполняем поля формы
                 self.medicine_form.ui.lineEdit.setText(str(medicine_data[0]))   
                 self.medicine_form.ui.lineEdit_2.setText(str(medicine_data[1])) 
                 self.medicine_form.ui.lineEdit_3.setText(str(medicine_data[2])) 
@@ -215,10 +214,8 @@ class main_window(QMainWindow):
                 orders_data = self.orders_data[current_row]
                 self.orders_form.inn = orders_data[0]
                 
-                # Загружаем данные для комбобоксов
                 self.orders_form.load_combo_boxes()
                 
-                # Заполняем поля формы
                 self.orders_form.ui.comboBox.setCurrentIndex(self.orders_form.find_combo_index_by_client_id(orders_data[1]))
                 self.orders_form.ui.comboBox_2.setCurrentIndex(self.orders_form.find_combo_index_by_medicine_id(orders_data[2]))
                 self.orders_form.ui.dateEdit.setDate(QDate.fromString(orders_data[3], 'yyyy-MM-dd'))
@@ -395,21 +392,18 @@ class orders_window(QDialog):
         self.medicine_data = []
 
     def load_combo_boxes(self):
-        # Загружаем список клиентов
         cursor.execute('SELECT client_number, surname, name FROM Оптовые_клиенты')
         self.client_data = cursor.fetchall()
         self.ui.comboBox.clear()
         for client in self.client_data:
             self.ui.comboBox.addItem(f"{client[1]} {client[2]} (ID: {client[0]})", client[0])
         
-        # Загружаем список препаратов
         cursor.execute('SELECT medicine_code, name FROM Препараты')
         self.medicine_data = cursor.fetchall()
         self.ui.comboBox_2.clear()
         for medicine in self.medicine_data:
             self.ui.comboBox_2.addItem(f"{medicine[1]} (ID: {medicine[0]})", medicine[0])
         
-        # Устанавливаем текущую дату
         self.ui.dateEdit.setDate(QDate.currentDate())
 
     def find_combo_index_by_client_id(self, client_id):
