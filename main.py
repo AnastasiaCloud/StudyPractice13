@@ -10,6 +10,30 @@ from clients import Ui_Dialog as clientsUI
 from orders import Ui_Dialog as ordersUI
 from medicine import Ui_Dialog as medicineUI
 
+from login import Ui_MainWindow as LoginUI
+
+LOGIN = "admin"
+PASSWORD = "admin"
+
+class LoginWindow(QMainWindow):
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
+        self.ui = LoginUI()
+        self.ui.setupUi(self)
+
+        #Подключаем кнопку
+        self.ui.pushButton.clicked.connect(self.login)
+        self.ui.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
+    #В фукнкции проверяем совпадают ли введеные данные с заданными
+    def login(self):
+        if self.ui.lineEdit.text() == LOGIN and self.ui.lineEdit_2.text() == PASSWORD:
+            self.main_form = main_window()  
+            self.main_form.show()
+            self.close()
+        else:
+            QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль")
+
+            
 class main_window(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
@@ -106,7 +130,7 @@ class main_window(QMainWindow):
         cursor.execute('SELECT * FROM Заказы')
         self.orders_data = cursor.fetchall()
 
-        self.ui.tableWidget.setColumnCount(3)
+        self.ui.tableWidget.setColumnCount(2)
         self.ui.tableWidget.setHorizontalHeaderLabels(['Заказы', 'Скидка'])
 
         self.ui.tableWidget.setRowCount(len(self.orders_data))
@@ -319,7 +343,7 @@ class orders_window(QDialog):
             self.ui.comboBox.addItem(f"{client[1]} {client[2]} (ID: {client[0]})", client[0])
         
         # Загружаем список препаратов
-        cursor.execute('SELECT medicine_number, name FROM Препараты')
+        cursor.execute('SELECT medicine_code, name FROM Препараты')
         self.medicine_data = cursor.fetchall()
         self.ui.comboBox_2.clear()
         for medicine in self.medicine_data:
@@ -344,7 +368,7 @@ class orders_window(QDialog):
         client_data = [
                        self.ui.comboBox.currentData(),
                        self.ui.comboBox_2.currentData(),
-                       self.ui.dateEdit.text().toString('yyyy-MM-dd'),
+                       self.ui.dateEdit.date().toString('yyyy-MM-dd'),
                        self.ui.lineEdit_2.text(),
                        self.ui.lineEdit_3.text()]
         if any([item == '' for item in client_data]):
@@ -356,7 +380,7 @@ class orders_window(QDialog):
             try:
                 cursor.execute('INSERT INTO Заказы VALUES(NULL,?,?,?,?,?)', client_data)
                 conn.commit()
-                main_form.read_medicine()
+                main_form.read_orders()
                 return
             except:
                 QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
@@ -366,7 +390,7 @@ class orders_window(QDialog):
         order_data = [
                        self.ui.comboBox.currentData(),
                        self.ui.comboBox_2.currentData(),
-                       self.ui.dateEdit.text().toString('yyyy-MM-dd'),
+                       self.ui.dateEdit.date().toString('yyyy-MM-dd'),
                        self.ui.lineEdit_2.text(),
                        self.ui.lineEdit_3.text()]
         if any([item == '' for item in client_data]):
@@ -378,19 +402,21 @@ class orders_window(QDialog):
             try:
                 cursor.execute(f'UPDATE Заказы SET client_number = ?, medicine_code = ?, date = ?, quantity = ?, sale = ? WHERE order_number = {order_id}', order_data)
                 conn.commit()
-                main_form.read_medicine()
+                main_form.read_orders()
                 return
             except:
                 QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
         
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)  
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon('icon.png'))
     conn = sqlite3.connect('Микстура.db')  
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = ON")
-    main_form = main_window()  
-    main_form.show()  
+    window = LoginWindow() #Создание окна авторизации
+    window.show()
+    result = app.exec_()
     sys.exit(app.exec_())  
     cursor.close()  
     conn.close()
