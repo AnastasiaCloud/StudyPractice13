@@ -42,6 +42,7 @@ class main_window(QMainWindow):
 
         self.ui.comboBox.currentTextChanged.connect(self.load_table)
         self.ui.pushButton.clicked.connect(self.open_add_form)
+        self.ui.pushButton_2.clicked.connect(self.delete_row)
         self.ui.tableWidget.itemClicked.connect(self.open_update_form)
 
         self.load_tables()
@@ -227,6 +228,65 @@ class main_window(QMainWindow):
                 self.orders_form.ui.pushButton.clicked.connect(self.orders_form.update_order)
                 self.orders_form.exec()
 
+    def delete_row(self):
+        current_table = self.ui.comboBox.currentText()
+        current_row = self.ui.tableWidget.currentRow()
+        print(current_row)
+        
+        if current_row < 0:
+            QMessageBox.warning(self, "Внимание", "Выберите запись для удаления")
+            return
+        
+        record_id = None
+        table_name = ""
+        id_field = ""
+        
+        if current_table == 'Оптовые_клиенты':
+            if hasattr(self, 'client_data') and current_row < len(self.client_data):
+                record_id = self.client_data[current_row][0]
+                table_name = "Оптовые_клиенты"
+                id_field = "client_number"
+        elif current_table == 'Препараты':
+            if hasattr(self, 'medicine_data') and current_row < len(self.medicine_data):
+                record_id = self.medicine_data[current_row][0]
+                table_name = "Препараты"
+                id_field = "medicine_code"
+        elif current_table == 'Заказы':
+            if hasattr(self, 'orders_data') and current_row < len(self.orders_data):
+                record_id = self.orders_data[current_row][0]
+                table_name = "Заказы"
+                id_field = "order_number"
+        
+        if record_id is None:
+            QMessageBox.warning(self, "Ошибка", "Не удалось определить запись для удаления")
+            return
+        
+        reply = QMessageBox.question(
+            self, 
+            "Подтверждение удаления", 
+            f"Вы действительно хотите удалить запись?\nЭто действие нельзя отменить.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                cursor.execute(f'DELETE FROM "{table_name}" WHERE {id_field} = ?', (record_id,))
+                conn.commit()
+                
+                if current_table == 'Оптовые_клиенты':
+                    self.read_clients()
+                elif current_table == 'Препараты':
+                    self.read_medicine()
+                elif current_table == 'Заказы':
+                    self.read_orders()
+                
+                QMessageBox.information(self, "Успех", "Запись успешно удалена")
+                
+            except Exception as e:
+                print(f"Ошибка при удалении: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить запись: {str(e)}")
+
 
 class client_window(QDialog):
     def __init__(self, parent=None):
@@ -241,9 +301,9 @@ class client_window(QDialog):
                        self.ui.lineEdit_4.text(),
                        self.ui.lineEdit_5.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to add a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -252,7 +312,7 @@ class client_window(QDialog):
                 main_form.read_clients()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
 
     def update_client(self):
         client_id = self.inn
@@ -262,9 +322,9 @@ class client_window(QDialog):
                        self.ui.lineEdit_4.text(),
                        self.ui.lineEdit_5.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to change a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -273,7 +333,7 @@ class client_window(QDialog):
                 main_form.read_clients()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
 
 
 class medicine_window(QDialog):
@@ -290,9 +350,9 @@ class medicine_window(QDialog):
                        self.ui.lineEdit_5.text(),
                        self.ui.lineEdit_6.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to add a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -301,7 +361,7 @@ class medicine_window(QDialog):
                 main_form.read_medicine()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
 
     def update_medicine(self):
         medicine_id = self.inn
@@ -312,9 +372,9 @@ class medicine_window(QDialog):
                        self.ui.lineEdit_5.text(),
                        self.ui.lineEdit_6.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to change a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -323,7 +383,7 @@ class medicine_window(QDialog):
                 main_form.read_medicine()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
 
 class orders_window(QDialog):
     def __init__(self, parent=None):
@@ -372,9 +432,9 @@ class orders_window(QDialog):
                        self.ui.lineEdit_2.text(),
                        self.ui.lineEdit_3.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to add a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -383,7 +443,7 @@ class orders_window(QDialog):
                 main_form.read_orders()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Adding error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
 
     def update_order(self):
         order_id = self.inn
@@ -394,9 +454,9 @@ class orders_window(QDialog):
                        self.ui.lineEdit_2.text(),
                        self.ui.lineEdit_3.text()]
         if any([item == '' for item in client_data]):
-            QMessageBox.critical(self, 'Not done', 'Fill all fields', QMessageBox.Ok)
+            QMessageBox.critical(self, 'Действие не выполнено', 'Заполните все поля', QMessageBox.Ok)
             return
-        q = QMessageBox.critical(self, 'Commit action', 'Do you really want to change a client?',
+        q = QMessageBox.critical(self, 'Подтвердите действие', 'Вы действительно хотите изменить запись?',
                                  QMessageBox.Ok|QMessageBox.Cancel)
         if q == QMessageBox.Ok:
             try:
@@ -405,7 +465,7 @@ class orders_window(QDialog):
                 main_form.read_orders()
                 return
             except:
-                QMessageBox.critical(self, 'Error', 'Changing error', QMessageBox.Ok)
+                QMessageBox.critical(self, 'Ошибка', 'Ошибка редактирования', QMessageBox.Ok)
         
 
 if __name__ == "__main__":
